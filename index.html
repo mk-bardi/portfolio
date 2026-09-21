@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Aerial robotics portfolio of Muhammad Mukhtar Bardi: autonomous VTOL aircraft, onboard perception, and the engineering behind them.">
+<meta name="theme-color" content="#0E1215">
+<meta property="og:title" content="Bardi Aerial Robotics">
+<meta property="og:description" content="Autonomous machines, built and flown from the bare foam up.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23DB9542'/%3E%3Cpath d='M16 6 L18 14 L28 16 L18 18 L16 26 L14 18 L4 16 L14 14 Z' fill='%230E1215'/%3E%3C/svg%3E">
+<style>
+html{color-scheme:dark;background:#0E1215;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{margin:0}
+body{font:14px system-ui,-apple-system,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Bardi Aerial Robotics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+
+<style>
+:root{
+  color-scheme:dark;
+  --paper:#0E1215;
+  --surface:#161B20;
+  --surface-2:#1C232A;
+  --ink:#E8ECEF;
+  --ink-2:#A3AFB8;
+  --ink-3:#7A868F;
+  --rule:#283138;
+  --rule-strong:#3A454E;
+  --accent:#DB9542;
+  --accent-ink:#E8AC63;
+  --accent-soft:#2A2015;
+
+  --f-display:"Archivo","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --gut:clamp(1rem,4vw,3rem);
+  --rail:8.5rem;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--f-body);font-size:1.0625rem;line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%;height:auto}
+a{color:var(--accent-ink);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 40%,transparent);transition:border-color .15s,color .15s}
+a:hover{border-bottom-color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:600;line-height:1.16;text-wrap:balance;margin:0}
+p{margin:0}
+::selection{background:var(--accent-soft);color:var(--ink)}
+
+.wrap{max-width:66rem;margin-inline:auto;padding-inline:var(--gut)}
+.band{padding-block:clamp(2.5rem,5.5vw,4.25rem);border-top:1px solid var(--rule)}
+.band.first{border-top:0}
+
+.grid{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);column-gap:2.25rem;row-gap:1.35rem;align-items:start}
+.grid > *{grid-column:2}
+.grid > .rail{grid-column:1;grid-row:1 / -1;position:sticky;top:calc(env(safe-area-inset-top,0px) + 1.5rem)}
+.grid > .bleed{grid-column:1 / -1}
+.measure{max-width:64ch}
+@media (max-width:760px){
+  .grid{grid-template-columns:minmax(0,1fr);row-gap:1.1rem}
+  .grid > *{grid-column:1}
+  .grid > .rail{grid-column:1;grid-row:auto;position:static;align-self:start}
+  .grid > .bleed{grid-column:1}
+}
+
+.rail{font-family:var(--f-mono);font-size:.7rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);padding-top:.42rem;border-top:2px solid var(--rule-strong);display:flex;flex-direction:column;gap:.2rem}
+.rail b{color:var(--accent);font-weight:500;letter-spacing:.14em}
+
+/* masthead */
+.masthead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.75rem 1.5rem;padding-block:1.4rem 1.1rem;border-bottom:1px solid var(--rule)}
+.masthead .who{font-family:var(--f-display);font-weight:700;font-size:1.02rem;letter-spacing:-.005em}
+.masthead .who a{color:inherit;border-bottom:0}
+.masthead nav{display:flex;flex-wrap:wrap;gap:.35rem 1.15rem;font-family:var(--f-mono);font-size:.74rem;letter-spacing:.06em;text-transform:uppercase}
+.masthead nav a{color:var(--ink-2);border-bottom:0}
+.masthead nav a:hover{color:var(--accent-ink)}
+
+/* hero */
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:flex;flex-wrap:wrap;gap:.3rem .9rem}
+.eyebrow span:not(:first-child)::before{content:"/";color:var(--ink-3);margin-right:.9rem}
+h1{font-size:clamp(2rem,5.8vw,3.3rem);font-weight:700;letter-spacing:-.022em;margin-block:.85rem .9rem}
+.standfirst{font-size:clamp(1.06rem,2.1vw,1.2rem);color:var(--ink-2);max-width:56ch}
+.standfirst strong{color:var(--ink);font-weight:600}
+
+figure{margin:0}
+.hero-fig{margin-top:2rem}
+.hero-fig img{width:100%;border:1px solid var(--rule);border-radius:3px;background:var(--surface-2)}
+figcaption{font-family:var(--f-mono);font-size:.73rem;line-height:1.55;color:var(--ink-3);margin-top:.6rem}
+figcaption b{color:var(--ink-2);font-weight:500}
+
+.fig-doc img{width:100%;background:#fff;border:1px solid var(--rule);border-radius:3px;padding:.5rem}
+
+.mono{font-family:var(--f-mono);font-size:.88em;color:var(--ink);background:var(--surface-2);border:1px solid var(--rule);border-radius:2px;padding:.05em .3em;white-space:nowrap}
+
+/* ---- video ---- */
+.vid{display:grid;gap:1rem 1.6rem;grid-template-columns:minmax(0,auto) minmax(0,1fr);align-items:start;margin-top:.4rem}
+.vid video{max-height:30rem;width:auto;max-width:100%;display:block;border:1px solid var(--rule);border-radius:3px;background:#000}
+.vid__note{display:flex;flex-direction:column;gap:.55rem;max-width:42ch}
+.vid__note h4{font-size:1.02rem;letter-spacing:-.008em}
+.vid__note p{font-size:.95rem;color:var(--ink-2)}
+.vid--wide{grid-template-columns:minmax(0,1fr)}
+.vid--wide video{max-height:none;width:100%}
+@media (max-width:760px){.vid{grid-template-columns:minmax(0,1fr)}.vid video{max-height:26rem;margin-inline:auto}}
+
+/* ---- intro with portrait ---- */
+.intro{display:grid;grid-template-columns:minmax(0,1fr) 11rem;gap:1.4rem 2.75rem;align-items:start}
+.intro__me{display:flex;flex-direction:column;gap:.55rem;align-items:flex-start}
+.intro__me img{width:11rem;height:auto;border-radius:3px;
+  -webkit-mask-image:linear-gradient(to bottom,#000 76%,transparent 99%);
+  mask-image:linear-gradient(to bottom,#000 76%,transparent 99%)}
+.intro__me figcaption{margin-top:0;line-height:1.7}
+@media (max-width:760px){
+  .intro{grid-template-columns:minmax(0,1fr);gap:1rem}
+  .intro__me{order:-1}
+  .intro__me img{width:7.25rem}
+}
+
+/* ---- project index cards ---- */
+.cards{display:grid;gap:1.15rem;grid-template-columns:repeat(auto-fit,minmax(min(19rem,100%),1fr));margin-top:.4rem}
+.card{
+  display:flex;flex-direction:column;
+  background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+  overflow:hidden;transition:border-color .16s,transform .16s;
+}
+.card:hover{border-color:var(--rule-strong);transform:translateY(-2px)}
+.card__shot{aspect-ratio:16/10;width:100%;object-fit:cover;background:var(--surface-2);border-bottom:1px solid var(--rule)}
+.card__shot--none{
+  display:flex;align-items:center;justify-content:center;text-align:center;padding:1.2rem;
+  background:
+    repeating-linear-gradient(135deg,transparent 0 9px,color-mix(in srgb,var(--rule) 55%,transparent) 9px 10px),
+    var(--surface-2);
+  border-bottom:1px solid var(--rule);
+}
+.card__shot--none span{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);line-height:1.8}
+.card__body{display:flex;flex-direction:column;gap:.6rem;padding:1.05rem 1.15rem 1.25rem;flex:1}
+.card__meta{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.card h3{font-size:1.18rem;letter-spacing:-.014em;color:var(--ink)}
+.card p{font-size:.95rem;color:var(--ink-2)}
+.facts{display:flex;flex-direction:column;gap:.28rem;margin-top:.1rem}
+.facts div{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.55rem;font-family:var(--f-mono);font-size:.74rem;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.facts b{color:var(--accent);font-weight:500}
+.more{margin-top:auto;padding-top:.85rem;font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);border-bottom:0;display:inline-flex;align-items:center;gap:.4rem;align-self:flex-start}
+.more::after{content:"\2192";transition:transform .16s}
+.card:hover .more::after{transform:translateX(3px)}
+
+/* back link */
+.back{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);border-bottom:0;display:inline-flex;gap:.45rem;align-items:center;padding-block:1.4rem .2rem}
+.back::before{content:"\2190"}
+.back:hover{color:var(--accent-ink)}
+
+/* spec table */
+.spec-wrap{overflow-x:auto}
+table.spec{border-collapse:collapse;width:100%;font-size:.95rem}
+table.spec th,table.spec td{text-align:left;vertical-align:top;padding:.62rem .9rem .62rem 0;border-bottom:1px solid var(--rule)}
+table.spec th{font-family:var(--f-mono);font-weight:400;font-size:.75rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);width:14rem;padding-right:1.5rem}
+table.spec td{font-variant-numeric:tabular-nums;color:var(--ink)}
+table.spec tr:last-child th,table.spec tr:last-child td{border-bottom:0}
+
+/* galleries */
+.gallery{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,minmax(min(15rem,100%),1fr));margin-top:.4rem}
+.gallery img{width:100%;border:1px solid var(--rule);border-radius:3px;aspect-ratio:4/5;object-fit:cover;background:var(--surface-2)}
+.gallery--wide img{aspect-ratio:4/3}
+
+/* slots */
+.slot{border:1.5px dashed var(--accent);background:var(--accent-soft);border-radius:3px;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.4rem}
+.slot__tag{font-family:var(--f-mono);font-size:.68rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-ink)}
+.slot p{font-size:.95rem;color:var(--ink-2);max-width:60ch}
+.slot--media{min-height:9rem;justify-content:center;align-items:flex-start}
+.fill{font-family:var(--f-mono);font-size:.9em;color:var(--accent-ink);background:var(--accent-soft);border-bottom:1.5px dashed var(--accent);padding:.05em .3em}
+
+/* steps */
+ol.steps{list-style:none;margin:0;padding:0;display:grid;gap:.1rem;counter-reset:step}
+ol.steps li{counter-increment:step;display:grid;grid-template-columns:2.6rem minmax(0,1fr);gap:.9rem;padding:.85rem 0;border-bottom:1px solid var(--rule)}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li > *{grid-column:2}
+ol.steps li::before{content:"T" counter(step,decimal-leading-zero);grid-column:1;grid-row:1;font-family:var(--f-mono);font-size:.78rem;font-weight:500;color:var(--accent);padding-top:.22rem}
+ol.steps--d li::before{content:"D" counter(step,decimal-leading-zero)}
+ol.steps h4{font-size:1rem;font-weight:600;margin-bottom:.15rem}
+ol.steps p{font-size:.95rem;color:var(--ink-2)}
+
+.result{border-left:3px solid var(--accent);padding:.15rem 0 .15rem 1.15rem;display:grid;gap:.5rem}
+.result .lede{font-size:1.1rem;font-weight:600;font-family:var(--f-display);letter-spacing:-.01em}
+.result p{color:var(--ink-2);font-size:.98rem;max-width:60ch}
+
+.stack{display:flex;flex-wrap:wrap;gap:.35rem}
+.stack span{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.05em;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--rule);border-radius:2px;padding:.2rem .45rem}
+
+.contact-list{display:grid;gap:.55rem;font-family:var(--f-mono);font-size:.9rem}
+.contact-list div{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:.8rem}
+.contact-list .k{color:var(--ink-3);font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;padding-top:.15rem}
+
+footer.foot{padding-block:2rem 3rem;border-top:1px solid var(--rule);color:var(--ink-3);font-family:var(--f-mono);font-size:.73rem}
+
+h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
+.sub{font-size:1.1rem;letter-spacing:-.01em;margin-top:.5rem}
+.view-title{font-size:clamp(1.75rem,4.6vw,2.6rem);font-weight:700;letter-spacing:-.02em;margin-block:.5rem .75rem}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="who"><a href="#work">Muhammad Mukhtar Bardi</a></div>
+    <nav>
+      <a href="#work">Work</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+</div>
+
+<!-- ==================== INDEX ==================== -->
+<main id="index">
+<div class="wrap">
+
+  <section class="band first">
+    <div class="intro">
+      <div class="intro__text">
+        <div class="eyebrow"><span>Aerial robotics</span><span>Zaria, Nigeria</span><span>2024&ndash;2026</span></div>
+        <h1>Autonomous machines, built and flown from the bare foam up.</h1>
+        <p class="standfirst">I design, fabricate and fly hybrid VTOL aircraft that do their own sensing in the air, and I build the perception and control that runs on them. <strong>What follows is the work itself, with the flight records, the failures I traced, and the numbers behind them.</strong></p>
+      </div>
+      <figure class="intro__me">
+        <img src="img/portrait-head.png" alt="Muhammad Mukhtar Bardi.">
+        <figcaption><b>Muhammad Mukhtar Bardi</b><br>B.Eng Mechatronics, ABU Zaria<br>Robotics Engineer Intern, Terrahaptix</figcaption>
+      </figure>
+    </div>
+
+    <figure class="hero-fig">
+      <img src="img/hero-airframe.jpg" alt="The finished SahelSense QuadPlane in three-quarter view: grey composite airframe, four lift motors on twin carbon booms, pusher propeller and twin tail.">
+      <figcaption><b>SahelSense.</b> Quad-lift plus pusher hybrid VTOL, 1.9 m span, scratch-built. Final-year project, Ahmadu Bello University, Zaria.</figcaption>
+    </figure>
+
+    <div class="vid" style="margin-top:2rem">
+      <video controls preload="metadata" playsinline poster="video/flight-poster.jpg" aria-label="The SahelSense QuadPlane launching vertically and climbing away at the test field.">
+        <source src="video/flight.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="vid__note">
+        <h4>It flies</h4>
+        <p>Vertical launch and climb-out at the test field outside Zaria, near last light. The four lift rotors take it off the ground, and the wing takes over once it has the speed.</p>
+        <p>One flight from a record of 28. The full account, with the propulsion analysis and the onboard perception work, is under <a href="#sahelsense">SahelSense</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band grid" id="work">
+    <div class="rail"><b>Work</b><span>Projects</span></div>
+    <h2 class="sec">Projects</h2>
+    <p class="measure">Each one was taken from design to something that actually runs. Open any of them for the full account, with the decisions and the results behind it.</p>
+
+    <div class="bleed cards">
+
+      <a class="card" href="#sahelsense">
+        <img class="card__shot" src="img/in-flight.jpg" alt="The SahelSense QuadPlane airborne against a dusk sky over the test field.">
+        <div class="card__body">
+          <div class="card__meta">Final-year project &middot; 2025&ndash;2026</div>
+          <h3>SahelSense</h3>
+          <p>A 1.9 m hybrid VTOL QuadPlane, scratch-built in composite, that computes vegetation indices onboard while it flies.</p>
+          <div class="facts">
+            <div><b>28</b><span>flights, including autonomous transition</span></div>
+            <div><b>1.82:1</b><span>measured hover thrust-to-weight</span></div>
+            <div><b>ICRA</b><span>2027 submission</span></div>
+          </div>
+          <span class="more">Read more</span>
+        </div>
+      </a>
+
+      <a class="card" href="#hand">
+        <img class="card__shot" src="img/hand-card.jpg" alt="The printed robotic hand holding the same gesture as the human hand beside it.">
+        <div class="card__body">
+          <div class="card__meta">Ongoing &middot; InMoov platform</div>
+          <h3>Vision-controlled hand</h3>
+          <p>A printed hand and forearm that copies a human hand live, from the camera feed alone, with the pipeline running on the robot itself.</p>
+          <div class="facts">
+            <div><b>5</b><span>tendon-driven fingers</span></div>
+            <div><b>ESP32</b><span>CAM for gesture capture</span></div>
+            <div><b>Edge</b><span>ported off laptop to Pi and Orange Pi</span></div>
+          </div>
+          <span class="more">Read more</span>
+        </div>
+      </a>
+
+      <a class="card" href="#carla">
+        <img class="card__shot" src="img/carla-card.jpg" alt="The CARLA simulator mid-run, a car driving a suburban street with a detection overlay.">
+        <div class="card__body">
+          <div class="card__meta">Team lead &middot; Shell competition 2025</div>
+          <h3>Autonomous driving stack</h3>
+          <p>A ROS 2 perception-and-control pipeline for a tracked UGV, and an autonomous driving system in CARLA.</p>
+          <div class="facts">
+            <div><b>Lead</b><span>Team ABU Zaria</span></div>
+            <div><b>120 s</b><span>timed runs, synchronous simulation</span></div>
+            <div><b>3D</b><span>perception stack for sensor fusion</span></div>
+          </div>
+          <span class="more">Read more</span>
+        </div>
+      </a>
+
+      <a class="card" href="#lumina">
+        <img class="card__shot" src="img/lumina-card.jpg" alt="Render of the FundusAI Lumina handheld retinal imaging device.">
+        <div class="card__body">
+          <div class="card__meta">FundusAI &middot; 2024&ndash;2025</div>
+          <h3>Lumina</h3>
+          <p>A handheld, smartphone-linked fundus camera that screens for diabetic retinopathy at the point of care.</p>
+          <div class="facts">
+            <div><b>&lt;3 s</b><span>detection target, at the point of care</span></div>
+            <div><b>Role</b><span>design, simulation, prototyping</span></div>
+            <div><b>Status</b><span>pre-clinical</span></div>
+          </div>
+          <span class="more">Read more</span>
+        </div>
+      </a>
+
+      <a class="card" href="#medicaid">
+        <img class="card__shot" src="img/medicaid-render.jpg" alt="CAD render of the MEDIC-AID dispenser, a white column with three chutes and a collection tray.">
+        <div class="card__body">
+          <div class="card__meta">Group project &middot; Designed and simulated</div>
+          <h3>MEDIC-AID</h3>
+          <p>A three-drug dispenser that counts pills as they fall, and tells a caregiver when a dose does not come out.</p>
+          <div class="facts">
+            <div><b>3</b><span>hoppers, one dose assembled from them</span></div>
+            <div><b>Piezo</b><span>drop sensing, closed-loop dispensing</span></div>
+            <div><b>Telegram</b><span>caregiver alerts and remote control</span></div>
+          </div>
+          <span class="more">Read more</span>
+        </div>
+      </a>
+
+      <!--
+        ADDING A PROJECT
+        1. Copy one <a class="card" href="#slug"> block above and edit it.
+           With a photo:    <img class="card__shot" src="img/your-shot.jpg" alt="...">
+           Without a photo: <div class="card__shot card__shot--none"><span>Project name</span></div>
+        2. Copy an <article data-view="slug"> block further down and edit it.
+           The href and the data-view must be the same slug.
+        The grid reflows on its own, so there is no count to update anywhere.
+      -->
+
+    </div>
+  </section>
+
+  <section class="band grid" id="experience">
+    <div class="rail"><b>Experience</b><span>Industry</span></div>
+    <h2 class="sec">Robotics Engineer Intern, Terrahaptix</h2>
+    <p class="measure">Idu Industrial, Abuja. June 2025 to present. ROS 2 perception and control pipelines for UAV autonomy, including a 3D perception stack for sensor fusion. PX4 and ArduPilot SITL with Gazebo to validate flight behaviour before hardware. Edge-AI inference brought up and tested on companion computers alongside flight-stack tuning, on production timelines.</p>
+    <div class="stack"><span>ROS 2</span><span>PX4 / ArduPilot SITL</span><span>Gazebo</span><span>Edge AI</span><span>Digital twins</span></div>
+    <figure class="bleed hero-fig" style="margin-top:1rem">
+      <img src="img/terrahaptix.jpg" alt="Two engineers working on a large tan UAV airframe opened up on a flight case, with avionics and structure exposed.">
+      <figcaption>Airframe work at Terrahaptix, Idu Industrial, Abuja.</figcaption>
+    </figure>
+  </section>
+
+  <section class="band grid" id="contact">
+    <div class="rail"><b>Contact</b><span>Get in touch</span></div>
+    <h2 class="sec">Get in touch</h2>
+    <p class="measure">B.Eng Mechatronics Engineering, Ahmadu Bello University, Zaria, 2026. I am glad to talk through any part of this in more detail, or to send drafts and flight logs.</p>
+    <div class="contact-list">
+      <div><span class="k">Email</span><span><a href="mailto:muktarbardi@gmail.com">muktarbardi@gmail.com</a></span></div>
+      <div><span class="k">GitHub</span><span><a href="https://github.com/mk-bardi">github.com/mk-bardi</a></span></div>
+      <div><span class="k">LinkedIn</span><span><a href="https://linkedin.com/in/mkbardi">linkedin.com/in/mkbardi</a></span></div>
+      <div><span class="k">Based in</span><span>Kaduna, Nigeria</span></div>
+    </div>
+    <div class="slot">
+      <span class="slot__tag">To add: CV</span>
+      <p>Host your CV PDF somewhere stable, on GitHub or Drive, and link it here. Files cannot be downloaded straight from this page, so it has to be a link out.</p>
+    </div>
+  </section>
+
+</div>
+</main>
+
+<!-- ==================== VIEW: SAHELSENSE ==================== -->
+<article data-view="sahelsense" hidden>
+<div class="wrap">
+  <a class="back" href="#work">All projects</a>
+
+  <section class="band first">
+    <div class="eyebrow"><span>Final-year project</span><span>ABU Zaria</span></div>
+    <h2 class="view-title">SahelSense: a hybrid VTOL that senses in the air</h2>
+    <p class="standfirst">A survey over Sahel margins needs two things at once: vertical takeoff from whatever ground is available, and the endurance of a fixed wing once it is up. <strong>This aircraft lifts on four rotors, transitions to wing-borne flight under its own logic, and computes vegetation indices onboard rather than shipping raw imagery home.</strong></p>
+    <figure class="hero-fig">
+      <img src="img/airframe-abu-hero.jpg" alt="The SahelSense QuadPlane standing on a concrete path outside the engineering department at ABU Zaria, glassed but unpainted.">
+      <figcaption><b>Outside the department at ABU Zaria</b>, glassed and rigged, on the path it launches from.</figcaption>
+    </figure>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>01</b><span>The aircraft</span></div>
+    <h3 class="sec">Specification</h3>
+    <div class="bleed spec-wrap">
+      <table class="spec">
+        <tr><th>Configuration</th><td>Quad-lift plus pusher hybrid VTOL (QuadPlane)</td></tr>
+        <tr><th>Wingspan</th><td>1.9 m</td></tr>
+        <tr><th>Structure</th><td>Hot-wired foam core, composite skin, carbon booms; built from scratch</td></tr>
+        <tr><th>Autopilot</th><td>SpeedyBee F405 Wing running ArduPlane, QuadPlane configuration</td></tr>
+        <tr><th>Companion computer</th><td>Raspberry Pi 3B</td></tr>
+        <tr><th>Lift propulsion</th><td>4 &times; QM5010 380&nbsp;KV on 15&Prime; props</td></tr>
+        <tr><th>Forward propulsion</th><td>T-Motor AT3520, pusher</td></tr>
+        <tr><th>Power</th><td>2 &times; 6S 6500&nbsp;mAh LiPo on a split bus, one pack to the forward motor, one to the four lift motors</td></tr>
+        <tr><th>Survey camera</th><td>SIYI A8 Mini, 8&nbsp;MP Sony sensor, 4K</td></tr>
+        <tr><th>Onboard software</th><td>ROS 2, MAVLink telemetry bridged into ArduPlane SITL</td></tr>
+        <tr><th>Onboard perception</th><td>GLI vegetation index module; YOLOv8n inference via ONNX</td></tr>
+        <tr><th>Simulation</th><td>Gazebo with ArduPilot SITL</td></tr>
+        <tr><th>All-up weight</th><td>5.5&nbsp;kg</td></tr>
+        <tr><th>Test site</th><td>Zaria, Nigeria. 670&nbsp;m elevation</td></tr>
+        <tr><th>Flights logged</th><td>28</td></tr>
+        <tr><th>Supervisor</th><td>Dr. Y. Danbatta, ABU Zaria</td></tr>
+        <tr><th>Repository</th><td><a href="https://github.com/mk-bardi/Project-Timbuktu">github.com/mk-bardi/Project-Timbuktu</a></td></tr>
+      </table>
+    </div>
+
+    <div class="bleed gallery gallery--wide">
+      <figure>
+        <img src="img/airframe-rear.jpg" alt="The aircraft seen head-on from behind: four lift rotors on twin booms, the pusher propeller on the fuselage, and the twin tail.">
+        <figcaption>The configuration in one view: four lift rotors on twin booms, pusher on the tail of the fuselage, twin fins.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/avionics-bay.jpg" alt="The open electronics bay of the aircraft with the battery being connected.">
+        <figcaption>Electronics bay open, battery going in before a sortie.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/integration-bench.jpg" alt="The aircraft on the floor with its bay open, beside a laptop running the ground station and the transmitter and telemetry gear.">
+        <figcaption>Integration and pre-flight: airframe, ground station, telemetry and transmitter, all on one floor.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/airframe-indoor.jpg" alt="The finished grey airframe from behind, showing the booms, twin tail and pusher propeller.">
+        <figcaption>Booms, twin tail and pusher, after paint.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>02</b><span>Flight test</span></div>
+    <h3 class="sec">28 flights, including autonomous transition</h3>
+    <p class="measure">The aircraft has flown 28 times. That record covers manual hover, assisted hover, wing-borne cruise, and autonomous waypoint missions in which the aircraft transitions between hover and forward flight on its own, with no pilot input at the transition. Every flight was logged, and the logs are what the propulsion work below rests on.</p>
+    <div class="bleed vid">
+      <video controls preload="metadata" playsinline poster="video/flight-poster.jpg" aria-label="Vertical launch and climb-out at the test field.">
+        <source src="video/flight.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="vid__note">
+        <h4>Launch and climb-out</h4>
+        <p>Filmed at the test field outside Zaria near last light. The aircraft lifts vertically on the four rotors, climbs away, and goes over to wing-borne flight.</p>
+
+      </div>
+    </div>
+
+    <h4 class="sub">Hover at the department</h4>
+    <div class="bleed vid">
+      <video controls preload="metadata" playsinline poster="video/hover-daylight-poster.jpg" aria-label="The aircraft holding a hover in front of the engineering building at ABU Zaria, in daylight.">
+        <source src="video/hover-daylight.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="vid__note">
+        <h4>Holding station</h4>
+        <p>Daylight hover outside the department at ABU Zaria, on the four lift rotors, in the airframe&rsquo;s glassed finish before paint.</p>
+      </div>
+    </div>
+
+    <h4 class="sub">Ground station</h4>
+    <div class="bleed vid vid--wide">
+      <video controls preload="metadata" playsinline poster="video/groundstation-poster.jpg" aria-label="Ground control station showing the aircraft on the map, parameter list and the airframe on the bench.">
+        <source src="video/groundstation.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="vid__note" style="max-width:64ch">
+        <p>Pre-flight on the ground control station: aircraft position on the map, the parameter set, and the airframe on the bench before a sortie.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>03</b><span>Propulsion</span></div>
+    <h3 class="sec">A hover fault, traced rather than tuned</h3>
+    <p class="measure">The aircraft climbed away cleanly and then could not hold altitude. It drifted sideways or sank from around a metre and a half, and throttle stopped answering above roughly half stick. It did this in QLOITER and also in QSTABILIZE, which is manual throttle with no autonomous altitude correction at all, and it kept doing it across many arms, sessions and hardware changes.</p>
+    <p class="measure">The reflex in that situation is to reach for the gains. I treated it as a measurement problem instead, and ran a progression where each step could eliminate something, rather than changing several things at once and flying again to see what happened. Several of those steps found real faults that turned out not to be the cause, which is worth saying plainly, because a fault you find is not automatically the fault you are looking for.</p>
+
+    <ol class="steps">
+      <li>
+        <h4>Rule out power delivery</h4>
+        <p>All power wiring replaced from 16 AWG to 10 AWG, batteries swapped. Voltage on the monitored circuit stayed stable and the behaviour did not change. Current capacity was checked separately and was never the constraint: the 5000&nbsp;mAh 20C pack flown at that stage supplies around 100&nbsp;A, against a hover draw of roughly 25 to 28&nbsp;A across the four lift motors.</p>
+      </li>
+      <li>
+        <h4>Find the battery compensation bug, and rule it out too</h4>
+        <p>Parameter analysis showed the QuadPlane was computing its thrust ceiling from the wrong battery. <span class="mono">Q_M_BAT_IDX</span> pointed at the monitored instance, which was the tractor motor&rsquo;s pack, not the one powering the lift motors. Logs showed the ceiling clamping to between 68 and 92 percent. That is a genuine misconfiguration, and it was fixed twice over, by rewiring the power module onto the lift pack and by disabling compensation outright. The fault persisted, so it was not the cause.</p>
+      </li>
+      <li>
+        <h4>Separate the motors from the control loop</h4>
+        <p>With <span class="mono">Q_ESC_CAL = 1</span>, stick input goes straight to PWM and the stabilisation loop is bypassed. In that state the aircraft behaved correctly and predictably all the way to 1889 PWM. Set back to 0, with the loop active again, the fault returned immediately. That put the motors and ESCs in the clear on direct commands and located the problem in what happens when the controller is asking for more than it is getting.</p>
+      </li>
+      <li>
+        <h4>Read the logs motor by motor</h4>
+        <p>Dataflash logs were rebuilt from the telemetry files by reassembling the embedded log chunks, then parsed directly. Across six flights, spanning battery swaps, rewiring, firmware changes and a tail removal, motor 2 was the most saturated motor in every single one, spending between 13.6 and 44.8 percent of flight time commanded above 1900 PWM. Motor 3 was consistently the least loaded. An asymmetry that survives every other variable points at one arm, not at a general power problem.</p>
+      </li>
+      <li>
+        <h4>Recheck the thrust budget from scratch</h4>
+        <p>Late on it emerged the lift props were 13 inch, not the 16 inch the sums had assumed. That invalidated the comfortable 2:1 figure that had been steering the investigation away from thrust for weeks. On the datasheet&rsquo;s nearest tested size the QM4208 makes about 1780 g at full throttle, against roughly 1150&nbsp;g per motor needed to hover at the 4.6&nbsp;kg the aircraft weighed at that point. That is around 65 percent throttle just to stay up, with almost nothing held back, and the datasheet&rsquo;s continuous ratings are quoted per ten seconds rather than sustained.</p>
+      </li>
+      <li>
+        <h4>Resize the lift system and re-fly</h4>
+        <p>The lift units went to QM5010 380 KV on 15 inch props. Same KV, so the change buys disc area rather than tip speed, and the larger motor is there to drive it. On the manufacturer&rsquo;s bench figures that puts the four motors at about 10.8 kg of static thrust against 5.5 kg all-up, near 2:1, with hover sitting around 60 percent throttle instead of 65 with nothing above it. The tractor motor was left alone, since the fault was in the lift axis only.</p>
+      </li>
+    </ol>
+
+    <div class="bleed gallery gallery--wide">
+      <figure>
+        <img src="img/motors-compared.jpg" alt="The old QM4208 380 KV motor held beside the larger QM5010 380 KV fitted to a boom.">
+        <figcaption>What the fix looked like. The QM4208 that came off, beside the QM5010 that went on, both 380&nbsp;KV.</figcaption>
+      </figure>
+    </div>
+
+    <h4 class="sub">What the logs looked like</h4>
+    <div class="bleed">
+      <figure class="fig-doc">
+        <img src="img/rcou-saturation.jpg" alt="ArduPilot log browser showing RCOU channels 5 to 8, the four lift motor outputs, across several arms. All four traces sit near the 1900 to 1950 PWM ceiling throughout each hover segment.">
+        <figcaption>Lift motor outputs across several arms, ArduPlane 4.6.3. All four channels run against the 1949 ceiling through every hover segment, which is the picture of a controller asking for thrust that is not there.</figcaption>
+      </figure>
+    </div>
+
+    <h4 class="sub">Why the site matters</h4>
+    <p class="measure">Zaria sits at 670 m, and manufacturer thrust tables are not measured in that air. A propulsion sum that takes a datasheet figure at face value is optimistic before any other error is added, which is part of why a number that looked like 2:1 on paper did not behave like 2:1 in the air.</p>
+
+    <h4 class="sub">Prediction against measurement</h4>
+    <p class="measure">With the lift system resized, the propulsion analysis was checked against what the aircraft learned for itself in flight. ArduPilot converges on a hover throttle and persists it, so the aircraft ends up holding its own measurement of the thrust it needs, arrived at independently of the sums that sized it.</p>
+
+    <div class="spec-wrap">
+      <table class="spec">
+        <tr><th>Measured</th><td><span class="mono">Q_M_THST_HOVER</span> = 0.5496, the converged value from the aircraft&rsquo;s own parameter file, giving a thrust-to-weight of <b>1.82:1</b> at 5.5&nbsp;kg all-up</td></tr>
+      </table>
+    </div>
+
+    <div class="result">
+      <div class="lede">The fault was lift authority, not control gains. Correcting it meant a change of motor and propeller on the physical airframe.</div>
+      <p>The value in this is not the fix. It is that the aircraft was telling the truth in its logs the whole time, the sums were wrong because an assumption underneath them was wrong, and once that assumption was corrected the analysis predicted what the aircraft would go on to learn for itself.</p>
+    </div>
+
+
+  </section>
+
+<section class="band grid">
+    <div class="rail"><b>04</b><span>Perception</span></div>
+    <h3 class="sec">Indices computed in the air, not on the ground</h3>
+    <p class="measure">The aircraft runs a GLI vegetation-index module and YOLOv8n inference on a Raspberry Pi 3B, through ONNX, against imagery from a SIYI A8 Mini. The reason is bandwidth. A survey aircraft working over the Sahel cannot count on a link that will carry raw imagery home, so the useful product has to be formed onboard and the link has to carry the result instead of the input. That constraint is the subject of the paper below.</p>
+    <h4 class="sub">The pipeline on the bench</h4>
+    <p class="measure">Before it goes up, the pipeline is exercised on the bench against a live feed. Two things run at once: detection, with boxes and confidences drawn on the frame, and the vegetation index, rendered beside the raw view so the two can be compared directly. Hold something green in front of the camera and it is the only thing that lights up in the index view while the rest of the scene falls away, which is exactly the behaviour the index has to have before it is worth flying.</p>
+
+    <div class="bleed vid vid--wide">
+      <video controls preload="metadata" playsinline poster="video/perception-bench-poster.jpg" aria-label="Bench test of the onboard perception pipeline: live detection with bounding boxes, and the vegetation index rendered beside the raw camera view.">
+        <source src="video/perception-bench.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="vid__note" style="max-width:64ch">
+        <p>Bench run of the perception stack against a live feed, with the aircraft on the table beside it.</p>
+      </div>
+    </div>
+
+    <div class="bleed gallery gallery--wide">
+      <figure>
+        <img src="img/index-bench.jpg" alt="A laptop screen showing the raw camera view on the left and the vegetation index view on the right, where a green cloth is the only bright region.">
+        <figcaption>Raw against index. The green target is the only thing the index holds onto.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/detection-bench.jpg" alt="A monitor showing live detection output with labelled bounding boxes and confidence values.">
+        <figcaption>Detection running on the same feed, boxes and confidences drawn live.</figcaption>
+      </figure>
+    </div>
+
+    <h4 class="sub">Perception-driven replanning, in progress</h4>
+    <p class="measure">The work I am on now closes the loop: the aircraft triggers its own re-survey of a region from what it senses in flight, rather than flying a plan fixed before takeoff. This is where the project meets the control and autonomy questions I want to work on at doctoral level.</p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>05</b><span>Paper</span></div>
+    <h3 class="sec">Submitted to ICRA 2027</h3>
+    <p class="measure"><strong>Bandwidth-Constrained Aerial Survey: Measured Uplink Capacity and Onboard Vegetation Indexing.</strong> Built on the platform above and on measured link capacity rather than assumed figures.</p>
+
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>06</b><span>Fabrication</span></div>
+    <h3 class="sec">Built by hand, in Zaria</h3>
+    <p class="measure">Wing and fuselage cores were cut and shaped from foam, then glassed and faired. There was no airframe supplier in the loop and no kit to fall back on, which is why the propulsion work above had to come from measurement rather than from a datasheet.</p>
+    <div class="bleed gallery">
+      <figure>
+        <img src="img/build-foam-cores.jpg" alt="Foam wing panels, tail surfaces and a fuselage profile laid out on a workbench.">
+        <figcaption>Cores and surfaces cut, before shaping.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/build-shaping.jpg" alt="Shaping a foam fuselage blank by hand with a sanding block.">
+        <figcaption>Fuselage blank shaped by hand.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/build-fuselage.jpg" alt="A shaped foam fuselage on the bench with a rotary tool in hand and foam dust everywhere.">
+        <figcaption>Fuselage cut and faired, with the wing panels waiting behind it.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/build-sanding.jpg" alt="Power-sanding the glassed fuselage in the workshop.">
+        <figcaption>Fairing the glassed fuselage.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="wrap" style="padding-inline:0"><a class="back" href="#work">All projects</a></div>
+</div>
+</article>
+
+<!-- ==================== VIEW: HAND ==================== -->
+<article data-view="hand" hidden>
+<div class="wrap">
+  <a class="back" href="#work">All projects</a>
+
+  <section class="band first">
+    <div class="eyebrow"><span>Ongoing</span><span>InMoov platform</span></div>
+    <h2 class="view-title">A printed hand that mirrors yours</h2>
+    <p class="standfirst">A camera watches a human hand and a 3D-printed hand copies it, live. <strong>No gloves, no markers, no controller. Hold up your hand and the machine holds up its own.</strong></p>
+
+    <div class="bleed vid">
+      <video controls preload="metadata" playsinline poster="video/hand-mirror-poster.jpg" aria-label="A 3D-printed robotic hand mirroring the gestures of a human hand held up beside it, in real time.">
+        <source src="video/hand-mirror.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="vid__note">
+        <h4>Side by side</h4>
+        <p>The printed hand is on the left, mine on the right. Fingers extend and curl to match as the gesture changes, driven from the camera feed alone.</p>
+        <p>Watching it next to the hand it is copying is the only honest way to show this working, because the interesting part is not that the fingers move, it is whether they move to the right positions.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>01</b><span>How it works</span></div>
+    <h3 class="sec">From camera to tendon</h3>
+    <p class="measure">A MediaPipe pipeline extracts hand landmarks from a live camera feed, and those landmarks are mapped to joint targets. The targets drive tendon-driven fingers through MG996R servos on a PCA9685 driver, with an ESP32-CAM supplying the capture stream. The mechanism is the InMoov open platform, printed and assembled here.</p>
+
+    <div class="bleed vid">
+      <video controls preload="metadata" playsinline poster="video/hand-tracking-poster.jpg" aria-label="MediaPipe hand landmark tracking running on a laptop, with a skeleton overlay following a moving hand.">
+        <source src="video/hand-tracking.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="vid__note">
+        <h4>What the machine sees</h4>
+        <p>The landmark skeleton tracking a hand as it moves and rotates. This is the input side of the loop above: everything the fingers do is derived from these points.</p>
+      </div>
+    </div>
+
+    <div class="stack"><span>MediaPipe</span><span>OpenCV</span><span>Python</span><span>ESP32-CAM</span><span>PCA9685</span><span>MG996R</span><span>Raspberry Pi 4B</span><span>Orange Pi</span></div>
+    <p class="measure"><a href="https://github.com/mk-bardi/Vision-Based-Robotic-Hand-with-media-pipe">github.com/mk-bardi/Vision-Based-Robotic-Hand-with-media-pipe</a></p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>02</b><span>Edge port</span></div>
+    <h3 class="sec">Off the laptop, onto the robot</h3>
+    <p class="measure">The pipeline first ran on a laptop with the robot as a peripheral. I then ported the control path to run standalone on a Raspberry Pi 4B and an Orange Pi, so the system is self-contained rather than tethered to a workstation.</p>
+    <p class="measure">That is the same constraint as the aircraft, arrived at from a different direction. Inference has to happen where the machine is, because a robot that needs a laptop nearby is not a robot, it is a peripheral.</p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>03</b><span>Build</span></div>
+    <h3 class="sec">Printed and assembled</h3>
+    <p class="measure">Every part was printed and assembled here, then tendon-routed and bench-tested servo by servo.</p>
+    <div class="bleed gallery">
+      <figure>
+        <img src="img/hand-print-parts.jpg" alt="A 3D printer bed covered with printed finger joints and linkages.">
+        <figcaption>Finger joints and linkages off the bed.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/hand-print-forearm.jpg" alt="Printed forearm shell sections on the printer bed.">
+        <figcaption>Forearm shell sections.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/hand-assembly.jpg" alt="Assembling printed parts and servo electronics at a desk.">
+        <figcaption>Assembly and servo bring-up.</figcaption>
+      </figure>
+      <figure>
+        <img src="img/hand-assembled.jpg" alt="The assembled InMoov hand and forearm.">
+        <figcaption>Complete, before tendon tensioning.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="wrap" style="padding-inline:0"><a class="back" href="#work">All projects</a></div>
+</div>
+</article>
+
+<!-- ==================== VIEW: CARLA ==================== -->
+<article data-view="carla" hidden>
+<div class="wrap">
+  <a class="back" href="#work">All projects</a>
+
+  <section class="band first">
+    <div class="eyebrow"><span>Team lead</span><span>Shell Eco-marathon</span><span>2025</span></div>
+    <h2 class="view-title">An autonomous driving stack, and the team that built it</h2>
+    <p class="standfirst">A ROS 2 perception-and-control pipeline for a tracked ground vehicle, and an autonomous driving system in CARLA. <strong>I led Team ABU Zaria into the Shell Eco-marathon Autonomous Programming Competition 2025.</strong></p>
+
+    <figure class="hero-fig">
+      <img src="img/carla-stack.jpg" alt="A Linux desktop with the CARLA simulator running on the right showing a car driving a suburban street with a detection overlay, and on the left the Python control script, a system monitor, and a terminal logging run progress and speed.">
+      <figcaption><b>A run in progress.</b> Control script, system monitor and the run log on the left, the simulator and its detection overlay on the right.</figcaption>
+    </figure>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>01</b><span>The stack</span></div>
+    <h3 class="sec">Perception, planning, control</h3>
+    <p class="measure">The vehicle runs a full ROS 2 perception-and-control pipeline, including a 3D perception stack used for sensor-fusion experiments, with deep-learning object detection on the camera feed and A* for path planning. The aim was a pipeline that holds up on real sensor data from a tracked platform, not only inside the simulator.</p>
+    <div class="stack"><span>ROS 2</span><span>CARLA</span><span>Python</span><span>A* planning</span><span>Deep-learning detection</span><span>Sensor fusion</span></div>
+    <p class="measure"><a href="https://github.com/mk-bardi/ABU_shell_auto">github.com/mk-bardi/ABU_shell_auto</a></p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>02</b><span>Planning</span></div>
+    <h3 class="sec">Two problems, solved in two different places</h3>
+    <p class="measure">Getting a vehicle around a set of goals is really two questions, and they are easy to run together. Which order should the goals be visited in, and how does the car get from one goal to the next. They are solved at different levels here, and only one of them runs live.</p>
+
+    <div class="bleed spec-wrap">
+      <table class="spec">
+        <tr><th>A*</th><td>How to drive between two consecutive goals. Live, on every replan, over CARLA&rsquo;s road-network graph</td></tr>
+        <tr><th>TSP</th><td>Which order to visit the goals in. Precomputed offline, baked into the waypoint file, not solved at runtime</td></tr>
+      </table>
+    </div>
+
+    <h4 class="sub">A*, in the loop</h4>
+    <p class="measure">Route search runs inside the global route planner against CARLA&rsquo;s road-network graph, and returns the waypoint chain the controller then follows. The search is my own implementation on the standard library rather than a networkx dependency, which keeps the planner free of a heavyweight graph package for one function.</p>
+
+    <h4 class="sub">The tour, computed once</h4>
+    <p class="measure">The visiting order over the 14 goals is a 2-opt tour computed offline, using Manhattan distance as a proxy for Town01&rsquo;s street grid. That gives a tour of about <b>1795 m</b> against roughly <b>1975 m</b> for a naive nearest-neighbour order, so about 9 percent shorter. The result is written into the waypoint file, and the planning node walks that list in order.</p>
+    <p class="measure">Worth being exact about this: the node is named for the TSP but does not solve one. It reads a precomputed order. Naming a variable after the problem it once solved is how a system quietly starts lying about itself, and it is worth saying out loud rather than letting a reader infer a runtime solver that is not there.</p>
+
+    <h4 class="sub">Where that falls down</h4>
+    <p class="measure">Manhattan distance does not know about one-way streets or actual road topology. Two goals a hundred metres apart in a straight line can be six hundred metres apart by road if they sit on opposite sides of a divided street, and a tour optimised on the straight-line proxy cannot see that. The correct version builds the cost matrix from real routed distances between every pair of goals, using the same route tracing the planner already has, and solves the tour on that. It runs once at startup, and it is where the distance and energy scores actually live.</p>
+
+    <h4 class="sub">Making runs comparable</h4>
+    <p class="measure">CARLA is only useful as a test bench if two runs of the same controller produce comparable numbers. The traffic manager runs in synchronous mode, so the simulation steps in lockstep with the client rather than drifting with whatever the machine is doing. Every traffic light in the world is forced green for the duration of a run. That second one is not a shortcut, it is removing a variable: a red light that catches one run and not the next contaminates the comparison with something that has nothing to do with the controller under test. Runs are timed over a fixed 120 second window, with progress and speed logged throughout.</p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>03</b><span>The team</span></div>
+    <h3 class="sec">Leading Team ABU Zaria</h3>
+    <p class="measure">Team Lead for the Shell Eco-marathon Autonomous Programming Competition 2025, entered as Team ABU Zaria from Ahmadu Bello University. I also served as Technical Lead for the Shell Eco-marathon electric category in 2024 and 2025, and as Program Director of the ABU Zaria Raspberry Pi Community.</p>
+    <div class="bleed gallery gallery--wide">
+      <figure>
+        <img src="img/carla-team.jpg" alt="Presenting the system architecture at a whiteboard to seated teammates, with ROS, A* path planning and deep learning object detection written up.">
+        <figcaption>Setting out the architecture with the team: operating system, path planning, object detection, and who owns what.</figcaption>
+      </figure>
+    </div>
+    <p class="measure"><a href="https://www.linkedin.com/posts/activity-7334395251039559680-1u8r">Run footage from the competition, on LinkedIn</a></p>
+  </section>
+
+  <div class="wrap" style="padding-inline:0"><a class="back" href="#work">All projects</a></div>
+</div>
+</article>
+
+<!-- ==================== VIEW: LUMINA ==================== -->
+<article data-view="lumina" hidden>
+<div class="wrap">
+  <a class="back" href="#work">All projects</a>
+
+  <section class="band first">
+    <div class="eyebrow"><span>FundusAI</span><span>2024&ndash;2025</span><span>Pre-clinical</span></div>
+    <h2 class="view-title">Lumina: retinal screening that fits in a hand and talks to a phone</h2>
+    <p class="standfirst">Diabetic retinopathy is one of the leading causes of blindness, and it is preventable when it is caught. <strong>What is scarce is not the treatment. It is the screening.</strong></p>
+
+    <figure class="hero-fig">
+      <img src="img/lumina-render.jpg" alt="Render of the FundusAI Lumina: a handheld retinal imaging device with a lens assembly at the front and a moulded grip.">
+      <figcaption><b>FundusAI Lumina.</b> Handheld fundus imaging device that interfaces with a smartphone.</figcaption>
+    </figure>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>01</b><span>The problem</span></div>
+    <h3 class="sec">The bottleneck is the instrument, not the diagnosis</h3>
+    <p class="measure">Fundus cameras are expensive, fixed and concentrated in specialist eye clinics. In most of the places where diabetes is rising fastest, that means a patient is never screened at all, and the first anyone knows of the disease is when sight is already going. Africa carries a rising diabetic burden and very little of the diagnostic equipment that goes with it.</p>
+    <p class="measure">Lumina attacks the access problem rather than the diagnostic one. It is built to be cheap enough and portable enough to put in the hands of an ordinary healthcare worker, and it interfaces with a smartphone rather than requiring a workstation of its own.</p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>02</b><span>The device</span></div>
+    <h3 class="sec">Imaging, then reading the image</h3>
+    <p class="measure">On the optical side, an adjustable coloured lighting system improves retinal illumination and a focus adjustment lets the operator work across different patients rather than a narrow ideal case. Both exist because the device has to work in the hands of a non-specialist, in a room that was not built for ophthalmology.</p>
+    <p class="measure">On the analysis side, AI does two jobs. It lifts image quality when capture conditions are poor, which is the normal case outside a clinic, and it reads the resulting image for signs of diabetic retinopathy and grades severity, so the healthcare worker gets an answer and a next step during the visit rather than after a referral.</p>
+    <div class="spec-wrap">
+      <table class="spec">
+        <tr><th>Form</th><td>Handheld, smartphone-interfacing fundus camera</td></tr>
+        <tr><th>Optics</th><td>Adjustable coloured illumination, adjustable focus</td></tr>
+        <tr><th>AI</th><td>Image enhancement for suboptimal capture, DR detection and severity grading</td></tr>
+        <tr><th>Design target</th><td>Detection in under three seconds, at the point of care</td></tr>
+        <tr><th>Intended users</th><td>Healthcare workers without ophthalmology training</td></tr>
+        <tr><th>Status</th><td>Pre-clinical. Clinical validation and funding are the next step</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>03</b><span>My part</span></div>
+    <h3 class="sec">What I worked on</h3>
+    <p class="measure">Volunteer Prototyping Engineer at FundusAI, 2024 to 2025. I contributed to the design of the device, the simulation work behind it, and the prototyping that turned the design into something physical to test.</p>
+    <p class="measure">Lumina is FundusAI&rsquo;s product and the engineering detail is theirs, so this page describes the device at the level the project describes itself publicly and stops there. I am glad to talk about my own contribution and the methods I used where that is appropriate.</p>
+  </section>
+
+  <div class="wrap" style="padding-inline:0"><a class="back" href="#work">All projects</a></div>
+</div>
+</article>
+
+<!-- ==================== VIEW: MEDIC-AID ==================== -->
+<article data-view="medicaid" hidden>
+<div class="wrap">
+  <a class="back" href="#work">All projects</a>
+
+  <section class="band first">
+    <div class="eyebrow"><span>Group project</span><span>ABU Zaria</span><span>Designed and simulated</span></div>
+    <h2 class="view-title">MEDIC-AID: a dispenser that knows whether the pill actually fell</h2>
+    <p class="standfirst">Medication Electronic Dispenser with Integrated Caregiver Alerts and IoT Dashboard. <strong>Turning a motor is the easy half. The work is in confirming the dose left the machine, and telling someone when it did not.</strong></p>
+
+    <div class="bleed vid vid--wide">
+      <video controls preload="metadata" playsinline poster="video/medicaid-render-poster.jpg" aria-label="CAD animation of the MEDIC-AID dispenser: three hoppers loading with pills, the assembled unit, and a dose landing in the collection tray.">
+        <source src="video/medicaid-render.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="vid__note" style="max-width:64ch">
+        <p>Three hoppers, one collection tray, one enclosure. The animation runs through loading each stage and a dose arriving in the tray.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>01</b><span>The system</span></div>
+    <h3 class="sec">Three stages, one dose</h3>
+    <p class="measure">A patient on several medications takes a different combination at different hours. MEDIC-AID holds three drugs in three independent hoppers, each with its own stepper and its own drop sensor, and assembles a dose out of them on a schedule. The default programme runs three doses a day at 08:00, 14:00 and 20:00, each specifying how many pills come from which stage, so a dose can be one from stage one and two from stage two and nothing from stage three.</p>
+    <p class="measure">When a dose is due, the unit alerts the patient for five seconds before anything moves, dispenses stage by stage, and reports the outcome. A stage set to zero pills is skipped rather than cycled.</p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>02</b><span>Dispensing</span></div>
+    <h3 class="sec">Closed loop, not open loop</h3>
+    <p class="measure">The naive version of this machine turns the motor a fixed number of steps and assumes a pill came out. That assumption fails exactly when it matters, on an empty hopper or a jam, and it fails silently.</p>
+    <p class="measure">Instead the firmware rotates in two-step chunks and counts pills as they are detected falling, advancing only when the detected count reaches the target for that stage. Small chunks rather than a single long rotation keep the sensor polling responsive, so a pill is never missed while the motor is busy. Dispensing is therefore driven by what was observed, not by what was commanded.</p>
+
+    <h4 class="sub">Faults name their own cause</h4>
+    <p class="measure">If a stage passes about twenty revolutions without reaching its target, the firmware stops and declares a fault. It also decides which fault: nothing detected at all is reported as an empty bottle, while some pills detected and then nothing is reported as a suspected jam. Those need different responses from a caregiver, so the machine distinguishes them rather than raising one generic error.</p>
+
+    <div class="spec-wrap">
+      <table class="spec">
+        <tr><th>Stages</th><td>3 independent hoppers, one stepper and one drop sensor each</td></tr>
+        <tr><th>Step granularity</th><td>2 steps per polling cycle, on 200-step-per-revolution motors</td></tr>
+        <tr><th>Fault threshold</th><td>4000 steps, about 20 revolutions, without reaching target</td></tr>
+        <tr><th>Fault classes</th><td>Empty bottle, suspected jam</td></tr>
+        <tr><th>Patient alert</th><td>5 s of buzzer and indicator before the first stage runs</td></tr>
+        <tr><th>States</th><td>Idle, alert, dispensing, complete, fault</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>03</b><span>Remote</span></div>
+    <h3 class="sec">Schedule, commands and a caregiver on the other end</h3>
+    <p class="measure">The dispenser talks to a hosted backend over HTTPS, which is what a caregiver reaches through Telegram and through the dashboard. Three things cross that link.</p>
+    <p class="measure">The dose schedule is pulled from the backend and merged over the built-in defaults field by field, so a failed sync leaves the machine running its last known programme rather than losing its schedule. Commands are polled every two seconds: dispense a full dose, dispense a single stage, or refresh the schedule. Each command is answered with a result, including a refusal, since a command that arrives mid-dose is rejected as busy rather than allowed to interleave with one already running.</p>
+    <p class="measure">In the other direction the unit posts an event stream: dose started, stage dispensed with target against actual, dose completed, and fault with its reason. That stream is the record a caregiver sees, and it is what makes a missed dose visible on the day rather than at the next refill.</p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>04</b><span>Hardware</span></div>
+    <h3 class="sec">The board</h3>
+    <p class="measure">The hardware design puts an ESP32-S2-WROVER against a DS3231M real-time clock. Each of the three bipolar steppers gets its own DRV8833 driver with its fault line brought back to the microcontroller. Pill detection is piezoelectric: a sensor on each chute picks up the impact of a pill passing, which is the event the counting logic above consumes.</p>
+    <p class="measure"><b>Status:</b> designed and simulated, hardware in progress. The firmware, the dispensing logic and the alerting path all run end to end in simulation; the board and the enclosure are being built.</p>
+    <div class="bleed">
+      <figure class="fig-doc">
+        <img src="img/medicaid-schematic.jpg" alt="Schematic of the MEDIC-AID board: ESP32-S2-WROVER, DS3231M real-time clock, three DRV8833 stepper drivers with bipolar motors, three piezoelectric sensors, buzzer and indicator LED.">
+        <figcaption>Three driver channels, three piezoelectric drop sensors, clock, buzzer and indicator, around an ESP32-S2-WROVER.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>05</b><span>Simulation</span></div>
+    <h3 class="sec">Verified in simulation before hardware</h3>
+    <p class="measure">The whole system was brought up in Wokwi first, with the full firmware including Wi-Fi and the backend calls, so the dispensing logic and the alerting path could be exercised before any board existed. Two substitutions were made deliberately and recorded rather than left to surprise anyone later: the simulator carries a DS1307 in place of the DS3231, an API difference noted for real deployment, and the piezoelectric drop sensors are stood in for by push buttons, which produce the same discrete detection event the counting logic consumes.</p>
+    <div class="bleed">
+      <figure class="fig-doc">
+        <img src="img/medicaid-wokwi.jpg" alt="The Wokwi simulation: an ESP32 DevKit wired to three stepper motors, three green drop buttons, a red manual dose button, a real-time clock module, buzzer and LED.">
+        <figcaption>The simulation build. Three steppers, three drop events standing in for the piezo sensors, a manual dose button, clock, buzzer and indicator.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>06</b><span>Decisions</span></div>
+    <h3 class="sec">The choices, and why</h3>
+    <p class="measure">Much of the engineering on this project sits in decisions rather than in code, so these are worth setting out plainly.</p>
+
+    <ol class="steps steps--d">
+      <li>
+        <h4>Wokwi over Proteus for simulation</h4>
+        <p>Native ESP32 support, the ability to simulate Wi-Fi, and free browser-based access. The Wi-Fi point decided it, because the caregiver alert is the part of this system most worth testing before hardware and the part a circuit simulator cannot reach.</p>
+      </li>
+      <li>
+        <h4>A full ESP32 DevKit in simulation, not the ESP32-C3</h4>
+        <p>A GPIO budget decision. The C3 exposes around 11 usable GPIOs and the design needs around 19, so it was ruled out by counting pins against the design rather than by discovering it during a build. The hardware design went to an ESP32-S2-WROVER for the same reason.</p>
+      </li>
+      <li>
+        <h4>DS1307 standing in for the DS3231</h4>
+        <p>The simulator carries the DS1307, so it was used in its place with the API difference written down as a known adjustment for deployment, rather than left to surface as a bug later.</p>
+      </li>
+      <li>
+        <h4>Build all three stages directly</h4>
+        <p>Rather than proving one stage and scaling it. The risk in this machine is in the sequencing between stages and in what happens when one of them fails mid-dose, and a single-stage proof of concept would not have exposed either.</p>
+      </li>
+      <li>
+        <h4>Defer Telegram and Wi-Fi until the dispensing logic was verified</h4>
+        <p>Connectivity is the easiest thing to debug and the easiest thing to hide behind. Getting the mechanical logic right in simulation first meant that when an alert failed afterwards, the cause was the alert.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div class="wrap" style="padding-inline:0"><a class="back" href="#work">All projects</a></div>
+</div>
+</article>
+
+<div class="wrap">
+  <footer class="foot">Muhammad Mukhtar Bardi &middot; Aerial robotics and autonomous systems &middot; Zaria, Nigeria</footer>
+</div>
+
+<script>
+(function(){
+  var views = Array.prototype.slice.call(document.querySelectorAll('[data-view]'));
+  var index = document.getElementById('index');
+  function route(){
+    var id = (location.hash || '').replace('#','');
+    var view = null;
+    for (var i=0;i<views.length;i++){ if (views[i].getAttribute('data-view') === id) { view = views[i]; break; } }
+    index.hidden = !!view;
+    views.forEach(function(v){ v.hidden = (v !== view); });
+    if (view){
+      window.scrollTo(0,0);
+    } else if (id){
+      var target = document.getElementById(id);
+      if (target) { target.scrollIntoView(); } else { window.scrollTo(0,0); }
+    } else {
+      window.scrollTo(0,0);
+    }
+  }
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+
+</body>
+</html>
