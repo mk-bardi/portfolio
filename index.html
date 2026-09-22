@@ -294,15 +294,15 @@ h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
       </a>
 
       <a class="card" href="#carla">
-        <img class="card__shot" src="img/carla-card.jpg" alt="The CARLA simulator mid-run, a car driving a suburban street with a detection overlay.">
+        <img class="card__shot" src="img/carla-card.jpg" alt="The CARLA simulator mid-run, a car driving a suburban street.">
         <div class="card__body">
           <div class="card__meta">Team lead &middot; Shell competition 2025</div>
           <h3>Autonomous driving stack</h3>
-          <p>A ROS 2 perception-and-control pipeline for a tracked UGV, and an autonomous driving system in CARLA.</p>
+          <p>A ROS 2 planning, perception and control stack that drives a car through 14 goals in CARLA.</p>
           <div class="facts">
             <div><b>Lead</b><span>Team ABU Zaria</span></div>
             <div><b>120 s</b><span>timed runs, synchronous simulation</span></div>
-            <div><b>3D</b><span>perception stack for sensor fusion</span></div>
+            <div><b>14</b><span>goals, A* routes, pure-pursuit steering</span></div>
           </div>
           <span class="more">Read more</span>
         </div>
@@ -701,19 +701,30 @@ h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
   <section class="band first">
     <div class="eyebrow"><span>Team lead</span><span>Shell Eco-marathon</span><span>2025</span></div>
     <h2 class="view-title">An autonomous driving stack, and the team that built it</h2>
-    <p class="standfirst">A ROS 2 perception-and-control pipeline for a tracked ground vehicle, and an autonomous driving system in CARLA. <strong>I led Team ABU Zaria into the Shell Eco-marathon Autonomous Programming Competition 2025.</strong></p>
+    <p class="standfirst">A ROS 2 stack that plans a route, watches the road ahead with LiDAR and steers a car through 14 goals in CARLA. <strong>I led Team ABU Zaria into the Shell Eco-marathon Autonomous Programming Competition 2025.</strong></p>
 
     <figure class="hero-fig">
-      <img src="img/carla-stack.jpg" alt="A Linux desktop with the CARLA simulator running on the right showing a car driving a suburban street with a detection overlay, and on the left the Python control script, a system monitor, and a terminal logging run progress and speed.">
-      <figcaption><b>A run in progress.</b> Control script, system monitor and the run log on the left, the simulator and its detection overlay on the right.</figcaption>
+      <img src="img/carla-stack.jpg" alt="A Linux desktop with the CARLA simulator running on the right showing a car driving a suburban street, and on the left a Python test script, a system monitor, and a terminal logging run progress and speed.">
+      <figcaption><b>An early test run.</b> The standalone test script, system monitor and run log on the left, the simulator on the right.</figcaption>
     </figure>
   </section>
 
   <section class="band grid">
     <div class="rail"><b>01</b><span>The stack</span></div>
-    <h3 class="sec">Perception, planning, control</h3>
-    <p class="measure">The vehicle runs a full ROS 2 perception-and-control pipeline, including a 3D perception stack used for sensor-fusion experiments, with deep-learning object detection on the camera feed and A* for path planning. The aim was a pipeline that holds up on real sensor data from a tracked platform, not only inside the simulator.</p>
-    <div class="stack"><span>ROS 2</span><span>CARLA</span><span>Python</span><span>A* planning</span><span>Deep-learning detection</span><span>Sensor fusion</span></div>
+    <h3 class="sec">Planning, perception, control</h3>
+    <p class="measure">Four processes. Three are ours, and the fourth is the bridge the competition provides between ROS 2 and the simulator. The bridge publishes odometry, speed, a VLP-16 LiDAR and a depth camera, and takes throttle, brake, steering, gear and handbrake commands back. Each of our nodes answers one question.</p>
+
+    <div class="spec-wrap">
+      <table class="spec">
+        <tr><th>planning_node</th><td>Where should we go? Routes to the current goal over CARLA&rsquo;s road network and publishes the path. 10&nbsp;Hz</td></tr>
+        <tr><th>perception_node</th><td>Is anything in the way? Publishes the distance to the nearest obstacle ahead, and an alert flag</td></tr>
+        <tr><th>control_node</th><td>How do we drive there? Pure-pursuit steering and PID speed control, turned into bridge commands. 20&nbsp;Hz</td></tr>
+      </table>
+    </div>
+
+    <p class="measure">One connection is odd. The planning node opens its own CARLA client, separate from the bridge, because the road network it plans over is not published on any ROS topic. That makes it the only node that talks to both worlds, and the only one that has to convert coordinates between ROS&rsquo;s frame and CARLA&rsquo;s.</p>
+    <p class="measure">The pieces that carry the maths live outside ROS: the route graph and A* search, the pure-pursuit law, and the frame conversion are small plain-Python modules, so they can be tested without a simulator running.</p>
+    <div class="stack"><span>ROS 2</span><span>CARLA</span><span>Python</span><span>A* planning</span><span>Pure pursuit</span><span>PID</span><span>LiDAR</span></div>
 
     <div class="bleed vid vid--wide">
       <video controls preload="metadata" playsinline poster="video/carla-run-poster.jpg" aria-label="RViz on a desktop monitor during a CARLA run: the vehicle's lidar point cloud around a grid on the right, and the front camera feed of the simulated street on the left.">
@@ -721,7 +732,7 @@ h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
         Your browser cannot play this video.
       </video>
       <div class="vid__note" style="max-width:64ch">
-        <p>The stack running against CARLA, seen in RViz: the lidar point cloud around the vehicle and the front camera feed, updating together as it drives.</p>
+        <p>The stack running against CARLA, seen in RViz: the LiDAR point cloud around the vehicle and the camera feed, updating together as it drives.</p>
       </div>
     </div>
 
@@ -741,7 +752,8 @@ h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
     </div>
 
     <h4 class="sub">A*, in the loop</h4>
-    <p class="measure">Route search runs inside the global route planner against CARLA&rsquo;s road-network graph, and returns the waypoint chain the controller then follows. The search is my own implementation on the standard library rather than a networkx dependency, which keeps the planner free of a heavyweight graph package for one function.</p>
+    <p class="measure">Route search runs inside the global route planner against CARLA&rsquo;s road-network graph, sampled at 2&nbsp;m, and returns the waypoint chain the controller then follows. The search is my own implementation on the standard library rather than a networkx dependency, which keeps the planner free of a heavyweight graph package for one function.</p>
+    <p class="measure">For each goal the node converts the car&rsquo;s odometry into CARLA&rsquo;s frame, traces the route, converts the waypoints back and publishes them as the path. A route with fewer than two points, or one that starts more than 25&nbsp;m from the car, is rejected and retried rather than handed to the controller. Within 3&nbsp;m of a goal the node moves on to the next one and replans, and after the fourteenth it publishes that the mission is complete.</p>
 
     <h4 class="sub">The tour, computed once</h4>
     <p class="measure">The visiting order over the 14 goals is a 2-opt tour computed offline, using Manhattan distance as a proxy for Town01&rsquo;s street grid. That gives a tour of about <b>1795 m</b> against roughly <b>1975 m</b> for a naive nearest-neighbour order, so about 9 percent shorter. The result is written into the waypoint file, and the planning node walks that list in order.</p>
@@ -751,11 +763,32 @@ h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
     <p class="measure">Manhattan distance does not know about one-way streets or actual road topology. Two goals a hundred metres apart in a straight line can be six hundred metres apart by road if they sit on opposite sides of a divided street, and a tour optimised on the straight-line proxy cannot see that. The correct version builds the cost matrix from real routed distances between every pair of goals, using the same route tracing the planner already has, and solves the tour on that. It runs once at startup, and it is where the distance and energy scores actually live.</p>
 
     <h4 class="sub">Making runs comparable</h4>
-    <p class="measure">CARLA is only useful as a test bench if two runs of the same controller produce comparable numbers. The traffic manager runs in synchronous mode, so the simulation steps in lockstep with the client rather than drifting with whatever the machine is doing. Every traffic light in the world is forced green for the duration of a run. That second one is not a shortcut, it is removing a variable: a red light that catches one run and not the next contaminates the comparison with something that has nothing to do with the controller under test. Runs are timed over a fixed 120 second window, with progress and speed logged throughout.</p>
+    <p class="measure">CARLA is only useful as a test bench if two runs of the same controller produce comparable numbers, and the early standalone test script was set up around that. The traffic manager runs in synchronous mode, so the simulation steps in lockstep with the client rather than drifting with whatever the machine is doing. Every traffic light in the world is forced green for the duration of a run. That second one is not a shortcut, it is removing a variable: a red light that catches one run and not the next contaminates the comparison with something that has nothing to do with the controller under test. Runs are timed over a fixed 120 second window, with progress and speed logged throughout.</p>
   </section>
 
   <section class="band grid">
-    <div class="rail"><b>03</b><span>The team</span></div>
+    <div class="rail"><b>03</b><span>Driving</span></div>
+    <h3 class="sec">Seeing the road, then following the path</h3>
+
+    <h4 class="sub">Perception: range, not recognition</h4>
+    <p class="measure">The perception node answers a narrow question: how far away is the nearest thing in front of the car. It keeps LiDAR returns inside a 30&deg; forward cone, drops anything closer than 3.5&nbsp;m, because those returns are the car&rsquo;s own bodywork, and publishes the nearest range that survives. The depth camera is the fallback when LiDAR is not available. There is an optional height window, off by default.</p>
+
+    <h4 class="sub">Steering: pure pursuit</h4>
+    <p class="measure">The controller finds the closest point on the path, walks forward to a lookahead point between 5 and 15&nbsp;m away depending on speed, and steers for the heading error to that point. The resulting road-wheel angle is divided by full lock to normalise it, then negated, because the bridge expects &minus;1 for left and +1 for right while the geometry is positive to the left.</p>
+
+    <h4 class="sub">Speed: PID under an obstacle ceiling</h4>
+    <p class="measure">Cruise target is 8&nbsp;m/s, capped by a ceiling set from the obstacle distance: full cruise beyond 6&nbsp;m, ramping down to a stop at 3&nbsp;m. The sign of the PID output chooses throttle or brake. Gear and handbrake are republished every cycle, so a bridge restart cannot leave the car sitting in neutral.</p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>04</b><span>Debugging</span></div>
+    <h3 class="sec">The bugs that did not throw</h3>
+    <p class="measure">Most of the bugs were ordinary: an import the environment did not have, the wrong goal list, a launch file hardcoded to localhost, the car&rsquo;s own body showing up as an obstacle, and three separate ways for obstacle handling to deadlock the car.</p>
+    <p class="measure">The two that took longest were the frame conversion and the steering sign, and they had the same shape. Both produced plausible numbers, raised no exception, and simply pointed the wrong way. Neither could be found by reading the code. They showed up only by comparing what the car did against what it should have done, which is the argument for keeping the conversion and the steering law in small modules that can be checked against known answers.</p>
+  </section>
+
+  <section class="band grid">
+    <div class="rail"><b>05</b><span>The team</span></div>
     <h3 class="sec">Leading Team ABU Zaria</h3>
     <p class="measure">Team Lead for the Shell Eco-marathon Autonomous Programming Competition 2025, entered as Team ABU Zaria from Ahmadu Bello University. I also served as Technical Lead for the Shell Eco-marathon electric category in 2024 and 2025, and as Program Director of the ABU Zaria Raspberry Pi Community.</p>
     <div class="bleed gallery gallery--wide">
