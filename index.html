@@ -714,6 +714,17 @@ h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
     <h3 class="sec">Perception, planning, control</h3>
     <p class="measure">The vehicle runs a full ROS 2 perception-and-control pipeline, including a 3D perception stack used for sensor-fusion experiments, with deep-learning object detection on the camera feed and A* for path planning. The aim was a pipeline that holds up on real sensor data from a tracked platform, not only inside the simulator.</p>
     <div class="stack"><span>ROS 2</span><span>CARLA</span><span>Python</span><span>A* planning</span><span>Deep-learning detection</span><span>Sensor fusion</span></div>
+
+    <div class="bleed vid vid--wide">
+      <video controls preload="metadata" playsinline poster="video/carla-run-poster.jpg" aria-label="RViz on a desktop monitor during a CARLA run: the vehicle's lidar point cloud around a grid on the right, and the front camera feed of the simulated street on the left.">
+        <source src="video/carla-run.mp4" type="video/mp4">
+        Your browser cannot play this video.
+      </video>
+      <div class="vid__note" style="max-width:64ch">
+        <p>The stack running against CARLA, seen in RViz: the lidar point cloud around the vehicle and the front camera feed, updating together as it drives.</p>
+      </div>
+    </div>
+
     <p class="measure"><a href="https://github.com/mk-bardi/ABU_shell_auto">github.com/mk-bardi/ABU_shell_auto</a></p>
   </section>
 
