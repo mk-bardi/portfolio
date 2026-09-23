@@ -194,6 +194,14 @@ ol.steps p{font-size:.95rem;color:var(--ink-2)}
 .stack{display:flex;flex-wrap:wrap;gap:.35rem}
 .stack span{font-family:var(--f-mono);font-size:.7rem;letter-spacing:.05em;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--rule);border-radius:2px;padding:.2rem .45rem}
 
+.pubs{list-style:none;margin:0;padding:0;display:grid}
+.pubs li{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:1rem;padding:.8rem 0;border-bottom:1px solid var(--rule)}
+.pubs li:last-child{border-bottom:0}
+.pubs .st{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding-top:.25rem}
+.pubs .st--sub{color:var(--accent)}
+.pubs .t{display:block;color:var(--ink);font-weight:600;line-height:1.4}
+.pubs .v{display:block;margin-top:.2rem;font-family:var(--f-mono);font-size:.78rem;color:var(--ink-2)}
+@media (max-width:560px){.pubs li{grid-template-columns:1fr;gap:.3rem}}
 .contact-list{display:grid;gap:.55rem;font-family:var(--f-mono);font-size:.9rem}
 .contact-list div{display:grid;grid-template-columns:5.5rem minmax(0,1fr);gap:.8rem}
 .contact-list .k{color:var(--ink-3);font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;padding-top:.15rem}
@@ -216,6 +224,7 @@ h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
     <nav>
       <a href="#work">Work</a>
       <a href="#experience">Experience</a>
+      <a href="#publications">Publications</a>
       <a href="#contact">Contact</a>
     </nav>
   </header>
@@ -361,6 +370,29 @@ h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
       <img src="img/terrahaptix.jpg" alt="Two engineers working on a large tan UAV airframe opened up on a flight case, with avionics and structure exposed.">
       <figcaption>Airframe work at Terrahaptix, Idu Industrial, Abuja.</figcaption>
     </figure>
+  </section>
+
+  <section class="band grid" id="publications">
+    <div class="rail"><b>Publications</b><span>Papers</span></div>
+    <h2 class="sec">Publications</h2>
+    <ul class="pubs measure">
+      <li>
+        <span class="st st--sub">Submitted</span>
+        <span><span class="t">Bandwidth-Constrained Aerial Survey: Measured Uplink Capacity and Onboard Vegetation Indexing</span><span class="v">ICRA 2027 &middot; <a href="#sahelsense">SahelSense project</a></span></span>
+      </li>
+      <li>
+        <span class="st">In progress</span>
+        <span><span class="t">Autonomy-Constrained Cycler Design: Propagating Rendezvous Guidance Limits into Trajectory Selection</span><span class="v">AAS/AIAA</span></span>
+      </li>
+      <li>
+        <span class="st">In progress</span>
+        <span><span class="t">Perception in the Loop: Onboard Index-Triggered Resurvey for Bandwidth-Denied Aerial Survey</span><span class="v">IROS 2027 &middot; submission March 2027</span></span>
+      </li>
+      <li>
+        <span class="st">In progress</span>
+        <span><span class="t">Proportional Navigation and State Estimation for Airborne Pursuit of Small UAS</span><span class="v">Journal of Field Robotics</span></span>
+      </li>
+    </ul>
   </section>
 
   <section class="band grid" id="contact">
