@@ -534,7 +534,7 @@ h2.sec{font-size:clamp(1.4rem,3.2vw,1.9rem);letter-spacing:-.018em}
       </li>
       <li>
         <h4>Read the logs motor by motor</h4>
-        <p>Dataflash logs were rebuilt from the telemetry files by reassembling the embedded log chunks, then parsed directly. Across six flights, spanning battery swaps, rewiring, firmware changes and a tail removal, motor 2 was the most saturated motor in every single one, spending between 13.6 and 44.8 percent of flight time commanded above 1900 PWM. Motor 3 was consistently the least loaded. An asymmetry that survives every other variable points at one arm, not at a general power problem.</p>
+        <p>Dataflash logs were rebuilt from the telemetry files by reassembling the embedded log chunks, then parsed directly. Across six flights, spanning battery swaps, rewiring, firmware changes and a tail removal, motor 2 was consistently the most saturated and motor 3 the least. I read that asymmetry as a single-motor fault, and I was wrong. Reading the absolute levels rather than the ranking showed all four lift motors running against the output ceiling through every hover segment, motor 2 merely reaching it first. A single bad arm does not saturate its three neighbours. What the logs actually described was a thrust margin that was not there on any arm, which is what sent the investigation back to the budget rather than to the airframe.</p>
       </li>
       <li>
         <h4>Recheck the thrust budget from scratch</h4>
